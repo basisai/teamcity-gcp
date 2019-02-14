@@ -5,8 +5,6 @@
         "zone": null,
         "network_project_id": null,
         "subnetwork": null,
-        "teamcity_image": "jetbrains/teamcity-server",
-        "teamcity_version": "2018.2.2",
         "image_base_name": "teamcity-server",
         "omit_external_ip": "false",
         "use_internal_ip": "false",
@@ -25,15 +23,13 @@
             "disable_default_service_account": true,
             "image_name": "{{user `image_base_name`}}-{{isotime | clean_image_name}}",
             "image_family": "{{user `image_base_name`}}",
-            "image_description": "TeamCity server version {{user `teamcity_version`}} built at {{isotime}}",
+            "image_description": "TeamCity Server built at {{isotime}}",
             "image_labels": {
                 "timestamp": "{{isotime | clean_image_name}}",
-                "teamcity_version": "{{user `teamcity_version` | sed \"s/[^a-zA-Z0-9]/-/g\"}}",
                 "packer": "true"
             },
             "labels": {
                 "timestamp": "{{isotime | clean_image_name}}",
-                "teamcity_version": "{{user `teamcity_version` | sed \"s/[^a-zA-Z0-9]/-/g\"}}",
                 "packer": "true"
             },
             "machine_type": "{{user `machine_type`}}",

@@ -1,5 +1,16 @@
 # TeamCity Server
 
+This module provisions a TeamCity server instance and a Postgres server on the same instance. Data
+is persisted in a separate GCE disk that is protected against deletion via Terraform's lifecycle
+rule.
+
+## Packer Template
+
+You need to build a GCE image for this module to use. We provide a [Packer](http://www.packer.io/)
+template in [`packer/`](packer/).
+
+Build the image with `packer build` and provide the necessary variables.
+
 ## Preparing the Data Disk
 
 When the data disk is first created, it contains no file system and needs to be formatted.
@@ -12,6 +23,19 @@ Then, create an instance using the Cloud console or `gcloud` and attach this dis
 Follow the instructions
 [here](https://cloud.google.com/compute/docs/disks/add-persistent-disk#formatting) to format the
 disk.
+
+## Setting up TeamCity
+
+When setting up TeamCity for the first time, you can provide it with the following settings for
+connecting to the local Postgres server:
+
+- URI: `postgres`
+- User: `postgres`
+- Password: `p@ssw0rd`
+- Database: `postgres`
+
+The local Postgres server is not accessible from outside the instance. If you prefer, you can use
+your own Postgres database elsewhere.
 
 ## Inputs
 

@@ -1,6 +1,10 @@
 locals {
   data_device_name = "teamcity-data"
   data_mount_path  = "/mnt/data"
+
+  base_metadata {
+    teamcity_version = "${var.teamcity_tag}"
+  }
 }
 
 resource "google_compute_instance" "teamcity_server" {
@@ -12,8 +16,8 @@ resource "google_compute_instance" "teamcity_server" {
 
   tags                      = "${var.tags}"
   labels                    = "${var.labels}"
-  metadata                  = "${var.metadata}"
-  metadata_startup_script   = ""
+  metadata                  = "${merge(local.base_metadata, var.metadata)}"
+  metadata_startup_script   = "${data.template_file.startup_script.rendered}"
   allow_stopping_for_update = "${var.allow_stopping_for_update}"
 
   service_account {

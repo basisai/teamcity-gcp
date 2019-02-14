@@ -1,0 +1,3 @@
+[submodule "vendor/ansible-docker-ubuntu"]
+	path = vendor/ansible-docker-ubuntu
+	url = https://github.com/lawliet89/ansible-docker-ubuntu.git

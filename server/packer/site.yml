@@ -1,0 +1,23 @@
+---
+- name: TeamCity Server Image
+  hosts: all
+  vars:
+    docker_version: "5:18.09.2~3-0~ubuntu-bionic"
+    docker_compose_version: "1.23.2"
+  tasks:
+  - name: Upgrade all packages to the latest version
+    apt:
+      upgrade: yes
+      update_cache: yes
+    become: yes
+  - name: Install Pip3
+    apt:
+      name: python3-pip
+      state: latest
+    become: yes
+  - name: Install Docker and Docker Compose
+    include_role:
+      name: "{{ playbook_dir }}/../../vendor/ansible-docker-ubuntu"
+    vars:
+      docker_py_version: ""
+      pip_executable: "pip3"

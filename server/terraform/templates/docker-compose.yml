@@ -1,0 +1,21 @@
+version: "2.0"
+services:
+  postgres:
+    image: postgres:9.6
+    volumes:
+      - ${volume_base_path}/postgres:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: p@ssw0rd
+    restart: always
+  teamcity:
+    image: ${teamcity_image}:${teamcity_tag}
+    volumes:
+      - ${volume_base_path}/teamcity:/data/teamcity_server/datadir
+      - ${volume_base_path}/logs:/opt/teamcity/logs
+    environment:
+      TEAMCITY_SERVER_MEM_OPTS: "${teamcity_memory_options}"
+    depends_on:
+      - postgres
+    ports:
+      - "${teamcity_port}:8111"
+    restart: always

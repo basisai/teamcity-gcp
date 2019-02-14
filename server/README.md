@@ -70,4 +70,6 @@ your own Postgres database elsewhere.
 | Name | Description |
 |------|-------------|
 | instance\_self\_link | Self link of the instance |
+| private\_ip | Private IP address of the instance |
+| public\_ip | Private IP address of the instance |
 | service\_account\_email | Email address of the service account used for the instance |

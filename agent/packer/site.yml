@@ -4,7 +4,7 @@
   vars:
     # TeamCity Base URL
     teamcity_base_url: ""
-    docker_version: "18.09.2~ce~3-0~ubuntu"
+    docker_version: "5:18.09.2~3-0~ubuntu-bionic"
     docker_compose_version: "1.23.2"
     teamcity_user: "teamcity"
     install_directory: "/opt/teamcity"
@@ -26,7 +26,7 @@
       - unzip
   - name: Install Docker and Docker Compose
     include_role:
-      name: "{{ playbook_dir }}/../vendor/ansible-docker-ubuntu"
+      name: "{{ playbook_dir }}/../../vendor/ansible-docker-ubuntu"
     vars:
       docker_py_version: ""
       pip_executable: "pip3"

@@ -1,0 +1,18 @@
+# See https://gist.github.com/BenWhitehead/9422087
+
+[Unit]
+Description=TeamCity Agent
+Requires=network.target
+After=syslog.target network.target
+
+[Service]
+ExecStart={{ install_directory }}/bin/agent.sh run
+ExecStop={{ install_directory }}/bin/agent.sh stop
+User={{ teamcity_user }}
+Group={{ teamcity_user }}
+Restart=on-failure
+RestartSec=10
+SyslogIdentifier=teamcity-agent
+
+[Install]
+WantedBy=multi-user.target

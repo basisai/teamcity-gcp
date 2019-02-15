@@ -1,0 +1,120 @@
+---
+- name: TeamCity Agent Image
+  hosts: all
+  vars:
+    # TeamCity Base URL
+    teamcity_base_url: ""
+    docker_version: "18.09.2~ce~3-0~ubuntu"
+    docker_compose_version: "1.23.2"
+    teamcity_user: "teamcity"
+    install_directory: "/opt/teamcity"
+  tasks:
+  - name: Upgrade all packages to the latest version
+    apt:
+      upgrade: yes
+      update_cache: yes
+    become: yes
+  - name: Install Packages
+    apt:
+      name: "{{ item }}"
+      state: latest
+    become: yes
+    loop:
+      - python3-pip
+      - openjdk-8-jdk
+      - git
+      - unzip
+  - name: Install Docker and Docker Compose
+    include_role:
+      name: "{{ playbook_dir }}/../vendor/ansible-docker-ubuntu"
+    vars:
+      docker_py_version: ""
+      pip_executable: "pip3"
+  - name: Manage User and Groups
+    block:
+    - name: Create "docker" group
+      group:
+        name: docker
+        state: present
+      become: yes
+    - name: Create TeamCity Group
+      group:
+        name: "{{ teamcity_user }}"
+        state: present
+      become: yes
+    - name: Create TeamCity User
+      user:
+        append: yes
+        comment: "TeamCity Agent user"
+        create_home: yes
+        group: "{{ teamcity_user }}"
+        groups:
+          - docker
+        name: "{{ teamcity_user }}"
+        shell: /bin/bash
+        state: present
+      become: yes
+  - name: Install TeamCity Agent
+    block:
+    - name: Download TeamCity Agent build
+      get_url:
+        dest: "~{{ teamcity_user }}/agent.zip"
+        force: yes
+        group: "{{ teamcity_user }}"
+        owner: "{{ teamcity_user }}"
+        url: "{{ teamcity_base_url }}/update/buildAgent.zip"
+      become: yes
+    - name: Make Install Directory
+      file:
+        path: "{{ install_directory }}"
+        state: directory
+        group: "{{ teamcity_user }}"
+        owner: "{{ teamcity_user }}"
+      become: yes
+    - name: Unarchive Agent files
+      unarchive:
+        dest: "{{ install_directory }}"
+        group: "{{ teamcity_user }}"
+        owner: "{{ teamcity_user }}"
+        remote_src : yes
+        src: "~{{ teamcity_user }}/agent.zip"
+      become: yes
+    - name: Set executeable
+      file:
+        path: "{{ install_directory }}/bin/agent.sh"
+        mode: 0755
+      become: yes
+    - name: Delete archive
+      file:
+        path: "~{{ teamcity_user }}/agent.zip"
+        state: absent
+      become: yes
+  - name: Configure TeamCity Agent
+    block:
+      - name: Create configuration file
+        copy:
+          dest: "{{ install_directory }}/conf/buildAgent.properties"
+          remote_src: yes
+          src: "{{ install_directory }}/conf/buildAgent.dist.properties"
+          group: "{{ teamcity_user }}"
+          owner: "{{ teamcity_user }}"
+        become: yes
+      - name: Fill in serverUrl
+        lineinfile:
+          line: "serverUrl={{ teamcity_base_url }}"
+          path: "{{ install_directory }}/conf/buildAgent.properties"
+          regexp: "serverUrl=http://localhost:8111/"
+        become: yes
+      - name: Create systemd service
+        template:
+          dest: "/etc/systemd/system/teamcity_agent.service"
+          group: root
+          owner: root
+          src: "{{ playbook_dir }}/teamcity_agent.service"
+        become: yes
+      - name: Enable systemd service
+        systemd:
+          daemon_reload: yes
+          enabled: yes
+          name: teamcity_agent
+        become: yes

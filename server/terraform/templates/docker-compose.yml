@@ -19,3 +19,7 @@ services:
     ports:
       - "${teamcity_port}:8111"
     restart: always
+   logging:
+      options:
+        max-size: 1Gb
+        max-file: 3

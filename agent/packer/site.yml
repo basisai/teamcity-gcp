@@ -8,6 +8,7 @@
     docker_compose_version: "1.23.2"
     teamcity_user: "teamcity"
     install_directory: "/opt/teamcity"
+    additional_configuration: ""
   tasks:
   - name: Upgrade all packages to the latest version
     apt:
@@ -104,6 +105,12 @@
           line: "serverUrl={{ teamcity_base_url }}"
           path: "{{ install_directory }}/conf/buildAgent.properties"
           regexp: "serverUrl=http://localhost:8111/"
+        become: yes
+      - name: Add in additional configuration
+        blockinfile:
+          path: "{{ install_directory }}/conf/buildAgent.properties"
+          block: "{{ additional_configuration }}"
+          insertafter: EOF
         become: yes
       - name: Create systemd service
         template:

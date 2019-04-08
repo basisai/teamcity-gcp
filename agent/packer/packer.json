@@ -13,7 +13,8 @@
         "disk_size": "10",
         "docker_version": "5:18.09.2~3-0~ubuntu-bionic",
         "docker_compose_version": "1.23.2",
-        "teamcity_user": "teamcity"
+        "teamcity_user": "teamcity",
+        "additional_configuration": ""
     },
     "builders": [
         {
@@ -57,6 +58,8 @@
             "extra_arguments": [
                 "-e",
                 "teamcity_base_url={{user `teamcity_base_url`}} teamcity_user={{user `teamcity_user`}}",
+                "-e",
+                "additional_configuration={{user `additional_configuration`}}",
                 "-e",
                 "docker_version={{user `docker_version`}} docker_compose_version={{user `docker_compose_version`}}",
                 "-e",

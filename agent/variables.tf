@@ -96,12 +96,12 @@ variable "disk_size_gb" {
 
 variable "instance_subnetworks" {
   description = "List of subnetworks to create the instances in"
-  type        = "list"
+  type        = list(string)
 }
 
 variable "instance_subnetworks_projects" {
   description = "List of projects matching the subnetworks in `instance_subnetworks`"
-  type        = "list"
+  type        = list(string)
 }
 
 variable "instance_subnetworks_count" {

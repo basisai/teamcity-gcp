@@ -1,3 +1,8 @@
+output "service_account_id" {
+  description = "Service Account ID for TeamCity agent"
+  value       = google_service_account.agent.account_id
+}
+
 output "service_account_name" {
   description = "Service Account name for TeamCity agent"
   value       = google_service_account.agent.name

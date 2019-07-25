@@ -37,6 +37,22 @@ connecting to the local Postgres server:
 The local Postgres server is not accessible from outside the instance. If you prefer, you can use
 your own Postgres database elsewhere.
 
+## Terraform
+
+Included Terraform Module will help you provision TeamCity easily.
+
+### Reconfiguring scheduled snapshots
+
+GCP will create snapshots TeamCity instance's disk on a regular basis. If you change any of the associated values (for example `max_retention_days`) after you have already terraformed the first time, run this command first:
+
+```bash
+terraform apply -target=module.teamcity_server.null_resource.unattach_policy
+```
+
+This is necessary to detach the scheduled snapshot policy from the disk first, so terraform can successfully attach the modified policy.
+
+Then `terraform apply` as per normal.
+
 ## Inputs
 
 | Name | Description | Type | Default | Required |
@@ -64,6 +80,10 @@ your own Postgres database elsewhere.
 | teamcity\_port | Port to expose TeamCity | string | `"80"` | no |
 | teamcity\_tag | TeamCity image tag to run | string | `"2018.2.2"` | no |
 | zone | Zone to launch instance in | string | n/a | yes |
+| region | Default region for GCP | string | n/a | yes |
+| snapshot\_days\_in\_cycle | Days between snapshots | number | 1 | no |
+| snapshot\_start\_time | Time of snapshot | string | `"20:00"` | no |
+| max\_retention\_days | Maximum age of the snapshot that is allowed to be kept | number | 5 | no |
 
 ## Outputs
 

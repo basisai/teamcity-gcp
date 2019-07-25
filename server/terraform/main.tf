@@ -29,14 +29,7 @@ resource "google_compute_instance" "teamcity_server" {
   }
 
   boot_disk {
-    initialize_params {
-      size = var.boot_disk_size_gb
-      type = var.boot_disk_type
-      image = coalesce(
-        var.boot_disk_image,
-        data.google_compute_image.teamcity_server.self_link,
-      )
-    }
+    source = google_compute_disk.teamcity_server_boot_disk.self_link
   }
 
   network_interface {
@@ -55,6 +48,18 @@ resource "google_compute_instance" "teamcity_server" {
     device_name = local.data_device_name
     mode        = "READ_WRITE"
   }
+}
+
+resource "google_compute_disk" "teamcity_server_boot_disk" {
+  name = google_compute_disk.teamcity_server_data.name
+  zone = var.zone
+
+  size  = var.boot_disk_size_gb
+  type  = var.boot_disk_type
+  image = coalesce(
+    var.boot_disk_image,
+    data.google_compute_image.teamcity_server.self_link,
+  )
 }
 
 resource "google_compute_disk" "teamcity_server_data" {

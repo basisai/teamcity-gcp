@@ -21,4 +21,14 @@ resource "google_compute_resource_policy" "teamcity_server_data" {
       guest_flush = false
     }
   }
+
+  provisioner "local-exec" {
+    command = "gcloud beta compute disks add-resource-policies $DISK_NAME --resource-policies $SCHEDULE_NAME --zone $ZONE"
+
+    environment = {
+      DISK_NAME = google_compute_disk.teamcity_server_data.self_link
+      SCHEDULE_NAME = google_compute_resource_policy.teamcity_server_data.self_link
+      ZONE = var.zone
+    }
+  }
 }

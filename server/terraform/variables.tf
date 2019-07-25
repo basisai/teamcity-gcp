@@ -8,6 +8,10 @@ variable "description" {
   default     = "TeamCity Server"
 }
 
+variable "region" {
+  description = "Default region for GCP"
+}
+
 variable "zone" {
   description = "Zone to launch instance in"
 }
@@ -108,4 +112,19 @@ variable "data_disk_type" {
 variable "teamcity_memory_options" {
   description = "Memory options for TeamCity. See https://confluence.jetbrains.com/display/TCD18/Installing+and+Configuring+the+TeamCity+Server#InstallingandConfiguringtheTeamCityServer-SettingUpMemorysettingsforTeamCityServer"
   default     = "-Xmx1024m"
+}
+
+variable "snapshot_days_in_cycle" {
+  description = "Days between snapshots"
+  default     = 1
+}
+
+variable "snapshot_start_time" {
+  description = "This must be in UTC format that resolves to one of 00:00, 04:00, 08:00, 12:00, 16:00, or 20:00. For example, both 13:00-5 and 08:00 are valid."
+  default     = "20:00"
+}
+
+variable "max_retention_days" {
+  description = "Maximum age of the snapshot that is allowed to be kept."
+  default     = 5
 }

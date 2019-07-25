@@ -3,21 +3,22 @@ resource "google_compute_resource_policy" "teamcity_server_data" {
 
   name    = "scheduled-snapshot-for-${google_compute_disk.teamcity_server_data.name}"
   project = var.project_id
+  region  = var.region
 
   snapshot_schedule_policy {
     schedule {
       daily_schedule {
-        days_in_cycle = 1
-        start_time = "20:00"
+        days_in_cycle = var.snapshot_days_in_cycle
+        start_time = var.snapshot_start_time
       }
     }
     retention_policy {
-      max_retention_days = 5
+      max_retention_days = var.max_retention_days
       on_source_disk_delete = "KEEP_AUTO_SNAPSHOTS"
     }
     snapshot_properties {
       labels = var.labels
-      storage_locations = ["asia-southeast1"]
+      storage_locations = [var.region]
       guest_flush = false
     }
   }
@@ -28,7 +29,7 @@ resource "google_compute_resource_policy" "teamcity_server_data" {
     environment = {
       DISK_NAME = google_compute_disk.teamcity_server_data.self_link
       SCHEDULE_NAME = google_compute_resource_policy.teamcity_server_data.self_link
-      ZONE = var.zone
+      ZONE = google_compute_disk.teamcity_server_data.zone
     }
   }
 }

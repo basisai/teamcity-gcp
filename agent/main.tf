@@ -30,9 +30,9 @@ resource "google_service_account" "server" {
 }
 
 resource "google_project_iam_member" "server" {
-  count = var.server_service_account_create ? length(local.server_roles) : 0
+  for_each = var.server_service_account_create ? toset(local.server_roles) : []
 
-  role    = element(local.server_roles, count.index)
+  role    = each.key
   project = var.project_id
   member  = "serviceAccount:${google_service_account.server[0].email}"
 }

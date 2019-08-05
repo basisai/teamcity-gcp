@@ -41,18 +41,6 @@ your own Postgres database elsewhere.
 
 Included Terraform Module will help you provision TeamCity easily.
 
-### Reconfiguring scheduled snapshots
-
-GCP will create snapshots TeamCity instance's disk on a regular basis. If you change any of the associated values (for example `max_retention_days`) after you have already terraformed the first time, run this command first:
-
-```bash
-terraform apply -target=module.teamcity_server.null_resource.unattach_policy
-```
-
-This is necessary to detach the scheduled snapshot policy from the disk first, so terraform can successfully attach the modified policy.
-
-Then `terraform apply` as per normal.
-
 ## Inputs
 
 | Name | Description | Type | Default | Required |

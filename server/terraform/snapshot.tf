@@ -1,5 +1,5 @@
 locals {
-  policy_name = "scheduled-snapshot-for-${google_compute_disk.teamcity_server_data.name}"
+  policy_name = "scheduled-snapshot-for-${var.data_disk_name}"
 }
 
 resource "google_compute_resource_policy" "teamcity_server_data" {
@@ -21,7 +21,7 @@ resource "google_compute_resource_policy" "teamcity_server_data" {
       on_source_disk_delete = "KEEP_AUTO_SNAPSHOTS"
     }
     snapshot_properties {
-      labels            = merge(var.labels, { checksum = null_resource.unattach_policy.id })
+      labels            = var.labels
       storage_locations = [var.region]
       guest_flush       = false
     }

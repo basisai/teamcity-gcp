@@ -58,6 +58,8 @@ resource "google_compute_instance" "teamcity_server" {
 }
 
 resource "google_compute_disk" "teamcity_server_data" {
+  provider = "google-beta"
+
   name        = var.data_disk_name
   description = "Disk holding the data for the TeamCity server instance ${var.name}"
 

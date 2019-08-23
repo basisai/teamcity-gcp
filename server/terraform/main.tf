@@ -69,7 +69,7 @@ resource "google_compute_disk" "teamcity_server_data" {
   zone    = var.zone
   project = var.project_id
 
-  resource_policies = [google_compute_resource_policy.teamcity_server_data.self_link]
+  # resource_policies = [google_compute_resource_policy.teamcity_server_data.self_link]
 
   lifecycle {
     prevent_destroy = true

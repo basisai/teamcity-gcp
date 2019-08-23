@@ -3,8 +3,6 @@ locals {
 }
 
 resource "google_compute_resource_policy" "teamcity_server_data" {
-  provider = "google-beta"
-
   name    = local.policy_name
   project = var.project_id
   region  = var.region
@@ -26,4 +24,11 @@ resource "google_compute_resource_policy" "teamcity_server_data" {
       guest_flush       = false
     }
   }
+}
+
+resource "google_compute_disk_resource_policy_attachment" "teamcity_server_data" {
+  zone    = var.zone
+  project = var.project_id
+  disk    = google_compute_disk.teamcity_server_data.name
+  name    = google_compute_resource_policy.teamcity_server_data.self_link
 }

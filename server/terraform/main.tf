@@ -83,6 +83,14 @@ resource "google_service_account" "teamcity_server" {
   project      = var.project_id
 }
 
+resource "google_project_iam_member" "teamcity_server" {
+  for_each = var.service_account_roles
+
+  project = var.project_id
+  role    = each.key
+  member  = "serviceAccount:${google_service_account.teamcity_server.email}"
+}
+
 data "template_file" "startup_script" {
   template = file("${path.module}/templates/startup.sh")
 

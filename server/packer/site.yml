@@ -2,8 +2,8 @@
 - name: TeamCity Server Image
   hosts: all
   vars:
-    docker_version: "5:18.09.2~3-0~ubuntu-bionic"
-    docker_compose_version: "1.23.2"
+    docker_version: "5:19.03.2~3-0~ubuntu-bionic"
+    docker_compose_version: "1.24.1"
   tasks:
   - name: Upgrade all packages to the latest version
     apt:
@@ -21,3 +21,30 @@
     vars:
       docker_py_version: ""
       pip_executable: "pip3"
+  - name: Install StackDriver monitoring agent
+    block:
+      - name: Create Temporary Script
+        tempfile:
+          state: file
+          suffix: ".sh"
+        register: "install_script"
+        become: yes
+      - name: Download Script
+        get_url:
+          url: https://dl.google.com/cloudagents/install-monitoring-agent.sh
+          force: yes
+          dest: "{{ install_script.path }}"
+          mode: '0777'
+        become: yes
+      - name: Run Script
+        command: "bash {{ install_script.path }}"
+        become: yes
+        register: install_output
+      - name: Print output
+        debug:
+          msg: "{{ install_output }}"
+      - name: Delete script
+        file:
+          state: absent
+          path: "{{ install_script.path }}"
+        become: yes

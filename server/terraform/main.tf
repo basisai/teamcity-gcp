@@ -58,8 +58,6 @@ resource "google_compute_instance" "teamcity_server" {
 }
 
 resource "google_compute_disk" "teamcity_server_data" {
-  provider = "google-beta"
-
   name        = var.data_disk_name
   description = "Disk holding the data for the TeamCity server instance ${var.name}"
 
@@ -68,8 +66,6 @@ resource "google_compute_disk" "teamcity_server_data" {
   type    = var.data_disk_type
   zone    = var.zone
   project = var.project_id
-
-  # resource_policies = [google_compute_resource_policy.teamcity_server_data.self_link]
 
   lifecycle {
     prevent_destroy = true

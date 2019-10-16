@@ -128,3 +128,12 @@ variable "max_retention_days" {
   description = "Maximum age of the snapshot that is allowed to be kept."
   default     = 5
 }
+
+variable "service_account_roles" {
+  description = "List of roles to assign to the TeamCity server service account"
+  type        = set(string)
+  default = [
+    "roles/logging.logWriter",
+    "roles/monitoring.metricWriter",
+  ]
+}

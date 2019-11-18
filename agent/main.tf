@@ -20,6 +20,14 @@ resource "google_service_account" "agent" {
   project = var.project_id
 }
 
+resource "google_project_iam_member" "project" {
+  for_each = var.service_account_roles
+
+  project = var.project_id
+  role    = each.key
+  member  = "serviceAccount:${google_service_account.agent.email}"
+}
+
 resource "google_service_account" "server" {
   count = var.server_service_account_create ? 1 : 0
 

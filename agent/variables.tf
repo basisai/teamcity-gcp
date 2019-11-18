@@ -12,6 +12,15 @@ variable "service_account_name" {
   default     = "teamcity-agent"
 }
 
+variable "service_account_roles" {
+  description = "Roles for the Agent Service Account"
+  type        = set(string)
+  default = [
+    "roles/logging.logWriter",
+    "roles/monitoring.metricWriter",
+  ]
+}
+
 variable "service_account_display" {
   description = "Display name for the TeamCity agent service account"
   default     = "Service Account for the TeamCity Agent"

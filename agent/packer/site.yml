@@ -125,3 +125,30 @@
           enabled: yes
           name: teamcity_agent
         become: yes
+  - name: Install StackDriver monitoring agent
+    block:
+      - name: Create Temporary Script
+        tempfile:
+          state: file
+          suffix: ".sh"
+        register: "install_script"
+        become: yes
+      - name: Download Script
+        get_url:
+          url: https://dl.google.com/cloudagents/install-monitoring-agent.sh
+          force: yes
+          dest: "{{ install_script.path }}"
+          mode: '0777'
+        become: yes
+      - name: Run Script
+        command: "bash {{ install_script.path }}"
+        become: yes
+        register: install_output
+      - name: Print output
+        debug:
+          msg: "{{ install_output }}"
+      - name: Delete script
+        file:
+          state: absent
+          path: "{{ install_script.path }}"
+        become: yes

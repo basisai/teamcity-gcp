@@ -9,6 +9,13 @@
     teamcity_user: "teamcity"
     install_directory: "/opt/teamcity"
     additional_configuration: ""
+    install_stackdriver_agent: false
+
+    install_telegraf: false
+    telegraf_install_version: "stable"
+    telegraf_directory: "/opt/telegraf"
+    telegraf_global_tags: |
+      usage = "teamcity-agent"
   tasks:
   - name: Upgrade all packages to the latest version
     apt:
@@ -125,6 +132,7 @@
           enabled: yes
           name: teamcity_agent
         become: yes
+
   - name: Install StackDriver monitoring agent
     block:
       - name: Create Temporary Script
@@ -152,3 +160,51 @@
           state: absent
           path: "{{ install_script.path }}"
         become: yes
+    when: install_stackdriver_agent|bool
+
+  - name: Install Telegraf
+    block:
+    - name: Import InfluxData GPG signing key [Debian/Ubuntu]
+      apt_key:
+        url: "https://repos.influxdata.com/influxdb.key"
+        state: present
+      become: yes
+    - name: Add InfluxData repository [Debian/Ubuntu]
+      apt_repository:
+        repo: deb https://repos.influxdata.com/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} {{ telegraf_install_version }}
+        state: present
+      become: yes
+    - name: Install Telegraf packages [Debian/Ubuntu]
+      apt:
+        name: telegraf
+        state: latest
+        update_cache: yes
+        cache_valid_time: 3600
+      register: apt_result
+      until: apt_result is success
+      retries: 2
+      delay: 5
+      become: yes
+
+    - name: Set templatized Telegraf configuration
+      template:
+        src: "{{ playbook_dir }}/telegraf.toml"
+        dest: "/etc/telegraf/telegraf.conf"
+        force: yes
+        backup: yes
+        owner: telegraf
+        group: telegraf
+        mode: 0744
+      become: yes
+
+    - name: Start the Telegraf service
+      service:
+        name: telegraf
+        state: started
+        enabled: yes
+      become: yes
+
+    when: install_telegraf|bool
+
+
+    # /etc/telegraf/telegraf.conf

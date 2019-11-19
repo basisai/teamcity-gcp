@@ -14,7 +14,9 @@
         "docker_version": "5:19.03.3~3-0~ubuntu-bionic",
         "docker_compose_version": "1.23.2",
         "teamcity_user": "teamcity",
-        "additional_configuration": ""
+        "additional_configuration": "",
+        "install_stackdriver_agent": "false",
+        "install_telegraf": "false"
     },
     "builders": [
         {
@@ -62,6 +64,8 @@
                 "additional_configuration={{user `additional_configuration`}}",
                 "-e",
                 "docker_version={{user `docker_version`}} docker_compose_version={{user `docker_compose_version`}}",
+                "-e",
+                "install_stackdriver_agent={{user `install_stackdriver_agent`}} install_telegraf={{user `install_telegraf`}}",
                 "-e",
                 "ansible_python_interpreter=/usr/bin/python3"
             ]

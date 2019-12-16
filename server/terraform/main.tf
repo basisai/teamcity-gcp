@@ -44,9 +44,9 @@ resource "google_compute_instance" "teamcity_server" {
     subnetwork_project = var.project_id
     network_ip         = var.network_ip
 
-    # TODO: With Terraform 0.12, allow the user to opt out of an emphemeral IP address
-    access_config {
+    dynamic "access_config" {
       // Ephemeral IP address
+      for_each = var.is_publicly_accessible ? [var.is_publicly_accessible] : []
     }
   }
 

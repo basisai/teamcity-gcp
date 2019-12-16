@@ -45,7 +45,7 @@ resource "google_compute_instance" "teamcity_server" {
     network_ip         = var.network_ip
 
     dynamic "access_config" {
-      // Ephemeral IP address
+      # Ephemeral IP address
       for_each = var.is_publicly_accessible ? [var.is_publicly_accessible] : []
       content {}
     }

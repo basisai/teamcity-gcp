@@ -37,6 +37,13 @@ connecting to the local Postgres server:
 The local Postgres server is not accessible from outside the instance. If you prefer, you can use
 your own Postgres database elsewhere.
 
+## Server logs
+
+In the server instance,
+```
+tail -f /var/log/startup-script.log
+```
+
 ## Terraform
 
 Included Terraform Module will help you provision TeamCity easily.

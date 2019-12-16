@@ -74,6 +74,11 @@ variable "network_ip" {
   default     = ""
 }
 
+variable "is_publicly_accessible" {
+  description = "Assign an ephemeral public IP to make it publicly accessible"
+  default     = false
+}
+
 variable "allow_stopping_for_update" {
   description = "f true, allows Terraform to stop the instance to update its properties. If you try to update a property that requires stopping the instance without setting this field, the update will fail."
   default     = "true"

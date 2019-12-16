@@ -15,5 +15,5 @@ output "private_ip" {
 
 output "public_ip" {
   description = "Private IP address of the instance"
-  value       = google_compute_instance.teamcity_server.network_interface[0].access_config[0].nat_ip
+  value       = length(google_compute_instance.teamcity_server.network_interface[0].access_config) > 0 ? google_compute_instance.teamcity_server.network_interface[0].access_config[0].nat_ip : null
 }

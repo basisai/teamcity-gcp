@@ -9,7 +9,6 @@ locals {
   server_roles = [
     "roles/viewer",
     "roles/compute.instanceAdmin",
-    "roles/iam.serviceAccountUser",
   ]
 }
 
@@ -43,6 +42,14 @@ resource "google_project_iam_member" "server" {
   role    = each.key
   project = var.project_id
   member  = "serviceAccount:${google_service_account.server[0].email}"
+}
+
+# Conform to CIS 1.5
+# This allow TC server's service account use TC agent's service account
+resource "google_service_account_iam_member" "server_use_agent" {
+  service_account_id = google_service_account.agent.name
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:${google_service_account.server[0].email}"
 }
 
 data "google_compute_image" "agent" {

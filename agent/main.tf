@@ -1,4 +1,9 @@
 locals {
+  # Conform to CIS 4.2
+  required_metadata = {
+    "block-project-ssh-keys" = "true"
+  }
+
   instance_image = coalesce(
     var.instance_image,
     data.google_compute_image.agent.self_link,
@@ -69,7 +74,7 @@ resource "google_compute_instance_template" "agent" {
 
   machine_type            = var.machine_type
   labels                  = var.labels
-  metadata                = var.metadata
+  metadata                = merge(var.metadata, local.required_metadata)
   metadata_startup_script = var.metadata_startup_script
   tags                    = var.tags
 

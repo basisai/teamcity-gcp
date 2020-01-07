@@ -1,4 +1,9 @@
 locals {
+  # Conform to CIS 4.2
+  required_metadata = {
+    "block-project-ssh-keys" = "true"
+  }
+
   data_device_name = "teamcity-data"
   data_mount_path  = "/mnt/data"
 
@@ -16,7 +21,7 @@ resource "google_compute_instance" "teamcity_server" {
 
   tags                      = var.tags
   labels                    = var.labels
-  metadata                  = merge(local.base_metadata, var.metadata)
+  metadata                  = merge(local.base_metadata, var.metadata, local.required_metadata)
   metadata_startup_script   = data.template_file.startup_script.rendered
   allow_stopping_for_update = var.allow_stopping_for_update
 

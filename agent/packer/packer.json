@@ -27,15 +27,15 @@
             "zone": "{{user `zone`}}",
             "ssh_username": "ubuntu",
             "disable_default_service_account": true,
-            "image_name": "{{user `image_base_name`}}-{{isotime | clean_image_name}}",
+            "image_name": "{{user `image_base_name`}}-{{isotime | clean_resource_name}}",
             "image_family": "{{user `image_base_name`}}",
             "image_description": "TeamCity agent built at {{isotime}}",
             "image_labels": {
-                "timestamp": "{{isotime | clean_image_name}}",
+                "timestamp": "{{isotime | clean_resource_name}}",
                 "packer": "true"
             },
             "labels": {
-                "timestamp": "{{isotime | clean_image_name}}",
+                "timestamp": "{{isotime | clean_resource_name}}",
                 "packer": "true"
             },
             "machine_type": "{{user `machine_type`}}",

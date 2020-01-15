@@ -67,7 +67,7 @@ resource "google_project_iam_custom_role" "manage_agents" {
 resource "google_project_iam_member" "server_project_viewer" {
   count = var.server_service_account_create ? 1 : 0
 
-  role    = "roles/viewer"
+  role    = "roles/compute.viewer"
   project = var.project_id
   member  = "serviceAccount:${google_service_account.server[0].email}"
 }

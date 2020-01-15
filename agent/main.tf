@@ -8,13 +8,6 @@ locals {
     var.instance_image,
     data.google_compute_image.agent.self_link,
   )
-
-  # Roles for the Server service account
-  # c.f. https://blog.jetbrains.com/teamcity/2017/06/run-teamcity-ci-builds-in-google-cloud/
-  server_roles = [
-    "roles/viewer",
-    "roles/compute.instanceAdmin",
-  ]
 }
 
 resource "google_service_account" "agent" {
@@ -41,10 +34,48 @@ resource "google_service_account" "server" {
   project = var.project_id
 }
 
-resource "google_project_iam_member" "server" {
-  for_each = var.server_service_account_create ? toset(local.server_roles) : []
+# Roles for the Server service account
+# c.f. https://blog.jetbrains.com/teamcity/2017/06/run-teamcity-ci-builds-in-google-cloud/
+resource "google_project_iam_custom_role" "manage_agents" {
+  count = var.server_service_account_create ? 1 : 0
 
-  role    = each.key
+  role_id     = "${replace(var.server_service_account_name, "-", "_")}_cloud_agent_manager"
+  title       = "TeamCity Google Cloud Agent Manager"
+  description = "IAM role for TeamCity server to manage Google Cloud Agents"
+
+  permissions = [
+    "compute.disks.create",
+    "compute.diskTypes.list",
+    "compute.images.list",
+    "compute.images.useReadOnly",
+    "compute.instances.create",
+    "compute.instances.delete",
+    "compute.instances.list",
+    "compute.instances.setLabels",
+    "compute.instances.setMetadata",
+    "compute.instances.setServiceAccount",
+    "compute.instanceTemplates.get",
+    "compute.instanceTemplates.list",
+    "compute.instanceTemplates.useReadOnly",
+    "compute.machineTypes.list",
+    "compute.networks.list",
+    "compute.subnetworks.list",
+    "compute.zones.list",
+  ]
+}
+
+resource "google_project_iam_member" "server_project_viewer" {
+  count = var.server_service_account_create ? 1 : 0
+
+  role    = "roles/compute.viewer"
+  project = var.project_id
+  member  = "serviceAccount:${google_service_account.server[0].email}"
+}
+
+resource "google_project_iam_member" "server_cloud_agent_manager" {
+  count = var.server_service_account_create ? 1 : 0
+
+  role    = google_project_iam_custom_role.manage_agents[0].id
   project = var.project_id
   member  = "serviceAccount:${google_service_account.server[0].email}"
 }

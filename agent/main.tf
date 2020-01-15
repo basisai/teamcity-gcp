@@ -37,12 +37,13 @@ resource "google_service_account" "server" {
 # Roles for the Server service account
 # c.f. https://blog.jetbrains.com/teamcity/2017/06/run-teamcity-ci-builds-in-google-cloud/
 resource "google_project_iam_custom_role" "manage_agents" {
+  count = var.server_service_account_create ? 1 : 0
+
   role_id     = "${replace(var.server_service_account_name, "-", "_")}_cloud_agent_manager"
   title       = "TeamCity Google Cloud Agent Manager"
   description = "IAM role for TeamCity server to manage Google Cloud Agents"
 
   permissions = [
-    // "roles/compute.instanceAdmin",
     "compute.disks.create",
     "compute.diskTypes.list",
     "compute.images.list",
@@ -74,7 +75,7 @@ resource "google_project_iam_member" "server_project_viewer" {
 resource "google_project_iam_member" "server_cloud_agent_manager" {
   count = var.server_service_account_create ? 1 : 0
 
-  role    = google_project_iam_custom_role.manage_agents.id
+  role    = google_project_iam_custom_role.manage_agents[0].id
   project = var.project_id
   member  = "serviceAccount:${google_service_account.server[0].email}"
 }

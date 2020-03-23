@@ -36,7 +36,10 @@
             "network_project_id": "{{user `network_project_id`}}",
             "subnetwork": "{{user `subnetwork`}}",
             "omit_external_ip": "{{user `omit_external_ip`}}",
-            "use_internal_ip": "{{user `use_internal_ip`}}"
+            "use_internal_ip": "{{user `use_internal_ip`}}",
+            "metadata": {
+                "enable-oslogin": "FALSE"
+            }
         }
     ],
     "provisioners": [

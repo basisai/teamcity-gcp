@@ -3,7 +3,7 @@ locals {
 
   iam_service_account = toset(compact([
     local.iam_server_service_account ? var.server_service_account : "",
-    var.server_service_account_create ? google_service_account.server[0].email: ""
+    var.server_service_account_create ? google_service_account.server[0].email : ""
   ]))
 }
 

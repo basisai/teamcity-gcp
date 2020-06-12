@@ -27,8 +27,13 @@ variable "service_account_display" {
 }
 
 variable "server_service_account_create" {
-  description = "Create a service account for TeamCity server to manage instances with the GCP plugin"
+  description = "Create a separate service account for TeamCity server to manage instances with the GCP plugin. You will need to create a separate key for this service account and enter it into TeamCity UI"
   default     = false
+}
+
+variable "iam_custom_role_name" {
+  description = "Name of the IAM Custom role to manage the agents"
+  default     = "teamcity_server_cloud_agent_manager"
 }
 
 variable "server_service_account_name" {
@@ -39,6 +44,11 @@ variable "server_service_account_name" {
 variable "server_service_account_display" {
   description = "Display name for the TeamCity server service account"
   default     = "Service Account for the TeamCity Server to manage agents"
+}
+
+variable "server_service_account" {
+  description = "If non-empty, will assign roles to the server service account directly"
+  default     = ""
 }
 
 variable "instance_template_prefix" {

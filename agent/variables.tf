@@ -113,6 +113,11 @@ variable "disk_size_gb" {
   default     = "100"
 }
 
+variable "disk_encryption_key" {
+  description = "CMEK for disk, if any"
+  default     = ""
+}
+
 variable "instance_subnetworks" {
   description = "List of subnetworks to create the instances in"
   type        = list(string)

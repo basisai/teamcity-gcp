@@ -52,6 +52,14 @@ resource "google_compute_instance_template" "agent" {
     source_image = local.instance_image
     disk_type    = var.disk_type
     disk_size_gb = var.disk_size_gb
+
+    dynamic "disk_encryption_key" {
+      for_each = var.disk_encryption_key != "" ? [var.disk_encryption_key] : []
+
+      content {
+        kms_key_self_link = disk_encryption_key.value
+      }
+    }
   }
 
   network_interface {

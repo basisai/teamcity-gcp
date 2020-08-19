@@ -1,5 +1,5 @@
 {
-    "min_packer_version": "1.3.4",
+    "min_packer_version": "1.6.1",
     "variables": {
         "project_id": null,
         "zone": null,
@@ -9,8 +9,8 @@
         "omit_external_ip": "false",
         "use_internal_ip": "false",
         "machine_type": "n1-standard-1",
-        "docker_version": "5:18.09.2~3-0~ubuntu-bionic",
-        "docker_compose_version": "1.23.2"
+        "docker_version": "5:18.09.9~3-0~ubuntu-bionic",
+        "docker_compose_version": "1.26.2"
     },
     "builders": [
         {
@@ -37,8 +37,10 @@
             "subnetwork": "{{user `subnetwork`}}",
             "omit_external_ip": "{{user `omit_external_ip`}}",
             "use_internal_ip": "{{user `use_internal_ip`}}",
+            "use_os_login": true,
             "metadata": {
-                "enable-oslogin": "FALSE"
+                "enable-oslogin": "TRUE",
+                "enable-oslogin-2fa": "FALSE"
             }
         }
     ],
@@ -52,7 +54,6 @@
         {
             "type": "ansible",
             "playbook_file": "{{ template_dir }}/site.yml",
-            "user": "ubuntu",
             "extra_arguments": [
                 "-e",
                 "docker_version={{user `docker_version`}} docker_compose_version={{user `docker_compose_version`}}",

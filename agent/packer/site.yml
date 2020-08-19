@@ -24,14 +24,13 @@
     become: yes
   - name: Install Packages
     apt:
-      name: "{{ item }}"
+      name:
+        - python3-pip
+        - openjdk-8-jdk
+        - git
+        - unzip
       state: latest
     become: yes
-    loop:
-      - python3-pip
-      - openjdk-8-jdk
-      - git
-      - unzip
   - name: Install Docker and Docker Compose
     include_role:
       name: "{{ playbook_dir }}/../../vendor/ansible-docker-ubuntu"
@@ -106,6 +105,7 @@
           src: "{{ install_directory }}/conf/buildAgent.dist.properties"
           group: "{{ teamcity_user }}"
           owner: "{{ teamcity_user }}"
+          mode: 0666
         become: yes
       - name: Fill in serverUrl
         lineinfile:
@@ -205,6 +205,3 @@
       become: yes
 
     when: install_telegraf|bool
-
-
-    # /etc/telegraf/telegraf.conf

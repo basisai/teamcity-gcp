@@ -9,7 +9,7 @@
         "omit_external_ip": "false",
         "use_internal_ip": "false",
         "machine_type": "n1-standard-1",
-        "docker_version": "5:18.09.9~3-0~ubuntu-bionic",
+        "docker_version": "5:19.03.13~3-0~ubuntu-focal",
         "docker_compose_version": "1.26.2"
     },
     "builders": [
@@ -17,7 +17,7 @@
             "name": "ubuntu-teamcity-server",
             "type": "googlecompute",
             "project_id": "{{user `project_id`}}",
-            "source_image_family": "ubuntu-1804-lts",
+            "source_image_family": "ubuntu-2004-lts",
             "zone": "{{user `zone`}}",
             "ssh_username": "ubuntu",
             "disable_default_service_account": true,

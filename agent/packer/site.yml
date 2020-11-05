@@ -75,7 +75,7 @@
         force: yes
         group: "{{ teamcity_user }}"
         owner: "{{ teamcity_user }}"
-        url: "{{ teamcity_base_url }}/update/buildAgent.zip"
+        url: "{{ teamcity_base_url }}/update/buildAgentFull.zip"
       become: yes
     - name: Make Install Directory
       file:

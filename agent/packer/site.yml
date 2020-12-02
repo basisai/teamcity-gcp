@@ -92,6 +92,14 @@
         remote_src : yes
         src: "~{{ teamcity_user }}/agent.zip"
       become: yes
+    - name: Set agent files owner
+      file:
+        path: "{{ install_directory }}"
+        group: "{{ teamcity_user }}"
+        owner: "{{ teamcity_user }}"
+        state: directory
+        recurse: yes
+      become: yes
     - name: Set executeable
       file:
         path: "{{ install_directory }}/bin/agent.sh"

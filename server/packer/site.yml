@@ -2,8 +2,10 @@
 - name: TeamCity Server Image
   hosts: all
   vars:
-    docker_version: "5:19.03.13~3-0~ubuntu-focal"
-    docker_compose_version: "1.24.1"
+    # sudo apt-cache madison docker-ce
+    docker_version: "5:20.10.6~3-0~ubuntu-focal"
+    docker_compose_version: "1.29.1"
+    install_os_config_agent: true
   tasks:
   - name: Upgrade all packages to the latest version
     apt:
@@ -48,3 +50,21 @@
           state: absent
           path: "{{ install_script.path }}"
         become: yes
+
+  - name: Install OS Config Agent
+    when: install_os_config_agent
+    # See https://cloud.google.com/compute/docs/manage-os#agent-install
+    block:
+    - name: Add GCP Repo
+      apt_repository:
+        repo: "deb http://packages.cloud.google.com/apt google-compute-engine-bionic-stable main"
+        state: present
+      become: yes
+    - name: Add GPG Key
+      apt_key:
+        url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+      become: yes
+    - name: Install
+      apt:
+        name: google-osconfig-agent
+        state: present

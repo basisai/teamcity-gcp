@@ -1,0 +1,43 @@
+---
+- name: Install  LetsEncrypt Certbot
+  hosts: all
+  tasks:
+  - name: Remove certbot if installed by apt
+    apt:
+      name: certbot
+      state: absent
+
+  - name: Upgrade all packages to the latest version
+    apt:
+      upgrade: yes
+      update_cache: yes
+    become: yes
+
+  - name: Update snap to the latest version
+    snap:
+      name:
+        - core
+      state: present
+
+  - name: Install certbot using snap
+    snap:
+      name: certbot
+      classic: yes
+      state: present
+
+  - name: Create certbot symlink
+    file:
+      src: /snap/bin/certbot
+      path: /usr/bin/certbot
+      state: link
+
+  - name: Confirm plugin containment level
+    shell:
+      cmd: snap set certbot trust-plugin-with-root=ok
+    args:
+      executable: /bin/bash
+
+  - name: Install certbot DNS plugin
+    snap:
+      name: certbot-dns-google
+      state: present

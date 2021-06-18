@@ -3,8 +3,8 @@
   hosts: all
   vars:
     # sudo apt-cache madison docker-ce
-    docker_version: "5:20.10.6~3-0~ubuntu-focal"
-    docker_compose_version: "1.29.1"
+    docker_version: "5:20.10.7~3-0~ubuntu-focal"
+    docker_compose_version: "1.29.2"
     install_os_config_agent: true
   tasks:
   - name: Upgrade all packages to the latest version
@@ -12,44 +12,47 @@
       upgrade: yes
       update_cache: yes
     become: yes
+
   - name: Install Pip3
     apt:
       name: python3-pip
       state: latest
     become: yes
+
   - name: Install Docker and Docker Compose
     include_role:
       name: "{{ playbook_dir }}/../../vendor/ansible-docker-ubuntu"
     vars:
       docker_py_version: ""
       pip_executable: "pip3"
+
   - name: Install StackDriver monitoring agent
     block:
-      - name: Create Temporary Script
-        tempfile:
-          state: file
-          suffix: ".sh"
-        register: "install_script"
-        become: yes
-      - name: Download Script
-        get_url:
-          url: https://dl.google.com/cloudagents/install-monitoring-agent.sh
-          force: yes
-          dest: "{{ install_script.path }}"
-          mode: '0777'
-        become: yes
-      - name: Run Script
-        command: "bash {{ install_script.path }}"
-        become: yes
-        register: install_output
-      - name: Print output
-        debug:
-          msg: "{{ install_output }}"
-      - name: Delete script
-        file:
-          state: absent
-          path: "{{ install_script.path }}"
-        become: yes
+    - name: Create Temporary Script
+      tempfile:
+        state: file
+        suffix: ".sh"
+      register: "install_script"
+      become: yes
+    - name: Download Script
+      get_url:
+        url: https://dl.google.com/cloudagents/install-monitoring-agent.sh
+        force: yes
+        dest: "{{ install_script.path }}"
+        mode: '0777'
+      become: yes
+    - name: Run Script
+      command: "bash {{ install_script.path }}"
+      become: yes
+      register: install_output
+    - name: Print output
+      debug:
+        msg: "{{ install_output }}"
+    - name: Delete script
+      file:
+        state: absent
+        path: "{{ install_script.path }}"
+      become: yes
 
   - name: Install OS Config Agent
     when: install_os_config_agent

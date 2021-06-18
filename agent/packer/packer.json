@@ -1,5 +1,5 @@
 {
-    "min_packer_version": "1.6.1",
+    "min_packer_version": "1.7.2",
     "variables": {
         "teamcity_base_url": null,
         "project_id": null,
@@ -11,8 +11,8 @@
         "use_internal_ip": "false",
         "machine_type": "n1-standard-1",
         "disk_size": "10",
-        "docker_version": "5:19.03.13~3-0~ubuntu-focal",
-        "docker_compose_version": "1.26.2",
+        "docker_version": "5:20.10.7~3-0~ubuntu-focal",
+        "docker_compose_version": "1.29.2",
         "teamcity_user": "teamcity",
         "additional_configuration": "",
         "install_stackdriver_agent": "false",

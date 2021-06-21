@@ -11,7 +11,7 @@ services:
     image: nginx:stable
     restart: always
     command: >
-      /bin/sh -c 'while true; do sleep 6h & wait \\$$\\$${!}; nginx -s reload; done & nginx -g "daemon off;"'
+      /bin/sh -c 'while true; do sleep 6h & wait \$\$${!}; nginx -s reload; done & nginx -g "daemon off;"'
     ports:
       - 80:80
       - 443:443

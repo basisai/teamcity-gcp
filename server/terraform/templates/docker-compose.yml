@@ -29,6 +29,7 @@ services:
       - ${volume_base_path}/logs:/opt/teamcity/logs
     environment:
       TEAMCITY_SERVER_MEM_OPTS: "${teamcity_memory_options}"
+      TEAMCITY_HTTPS_PROXY_ENABLED: "true"
     depends_on:
       - postgres
       - nginx

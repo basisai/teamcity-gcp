@@ -62,6 +62,8 @@ function mount_data() {
     echo "UUID=$${uuid} $${mount_path} ext4 discard,defaults,nofail 0 2" >> /etc/fstab
     # Safety Check
     mount -a
+    log_info "Make sure data volume ownership is 1000:1000"
+    chown -R 1000:1000 $${mount_path}/{teamcity,nginx,logs}
 }
 
 function configure_teamcity() {

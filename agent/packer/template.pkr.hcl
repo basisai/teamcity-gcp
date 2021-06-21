@@ -48,7 +48,7 @@ variable "network_project_id" {
 
 variable "omit_external_ip" {
   type    = string
-  default = "false"
+  default = "true"
 }
 
 variable "project_id" {
@@ -70,28 +70,32 @@ variable "teamcity_user" {
 
 variable "use_internal_ip" {
   type    = string
-  default = "false"
+  default = "true"
 }
 
 variable "zone" {
   type = string
 }
 
+locals {
+  packer_build_time = lower(formatdate("YYYY-MM-DD'T'hh-mm-ssZ", timestamp()))
+}
+
 source "googlecompute" "ubuntu-teamcity-agent" {
   disable_default_service_account = true
 
   disk_size         = var.disk_size
-  image_description = "TeamCity agent built at {{ timestamp }}"
+  image_description = "TeamCity agent built at ${local.packer_build_time}"
   image_family      = var.image_base_name
   image_labels = {
     packer    = "true"
-    timestamp = "{{ timestamp }}"
+    timestamp = "${local.packer_build_time}"
   }
-  image_name = "${var.image_base_name}-{{ timestamp }}"
+  image_name = "${var.image_base_name}-${local.packer_build_time}"
 
   labels = {
     packer    = "true"
-    timestamp = "{{ timestamp }}"
+    timestamp = "${local.packer_build_time}"
   }
 
   machine_type = var.machine_type

@@ -124,9 +124,12 @@ data "template_file" "startup_script" {
   template = file("${path.module}/templates/startup.sh")
 
   vars = {
-    data_device_name = local.data_device_name
-    data_mount_path  = local.data_mount_path
-    compose_config   = data.template_file.compose_config.rendered
+    admin_email       = var.admin_email
+    teamcity_base_url = var.teamcity_base_url
+    data_device_name  = local.data_device_name
+    data_mount_path   = local.data_mount_path
+    compose_config    = data.template_file.compose_config.rendered
+    nginx_config      = data.template_file.nginx_config.rendered
   }
 }
 
@@ -139,5 +142,13 @@ data "template_file" "compose_config" {
     teamcity_image          = var.teamcity_image
     teamcity_tag            = var.teamcity_tag
     teamcity_memory_options = var.teamcity_memory_options
+  }
+}
+
+data "template_file" "nginx_config" {
+  template = file("${path.module}/templates/teamcity.conf")
+
+  vars = {
+    teamcity_base_url = var.teamcity_base_url
   }
 }

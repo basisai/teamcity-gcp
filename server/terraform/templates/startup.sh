@@ -6,6 +6,8 @@ readonly SCRIPT_NAME="$(basename "$0")"
 readonly MARKER_PATH="/etc/startup-marker"
 readonly TEAMCITY_DATA_MOUNT="${data_mount_path}"
 readonly TEAMCITY_DIRECTORY="/opt/teamcity"
+readonly TEAMCITY_DOMAIN_NAME="${teamcity_base_url}"
+readonly ADMIN_EMAIL="${admin_email}"
 
 # Send the log output from this script to startup-script.log, syslog, and the console
 # Inspired by https://alestic.com/2010/12/ec2-user-data-output/
@@ -33,6 +35,17 @@ function log_error {
   log "ERROR" "$${message}"
 }
 
+function generate_cert () {
+    local readonly admin_email="$${1}"
+    local readonly domain_name="$${2}"
+    log_info "Generating LetsEncrypt certificate"
+    certbot certonly --quiet --agree-tos --keep-until-expiring \
+        --rsa-key-size 4096 \
+        -m "$${admin_email}" \
+        --dns-google -d "$${domain_name}" \
+        --dns-google-propagation-seconds 90
+}
+
 function mount_data() {
     local readonly device_name="$${1}"
     local readonly mount_path="$${2}"
@@ -57,12 +70,18 @@ function configure_teamcity() {
     local readonly teamcity_directory="$${1}"
     local readonly teamcity_data_mount="$${2}"
 
-    mkdir -p "$${teamcity_directory}"
+    mkdir -p "$${teamcity_directory}/nginx"
 
     local compose_config=$(cat <<EOF
 ${compose_config}
 EOF
 )
+    local nginx_config=$(cat <<EOF
+${nginx_config}
+EOF
+)
+    log_info "Writing TeamCity nginx config file"
+    echo -n "$${nginx_config}" > "$${teamcity_directory}/nginx/teamcity.conf"
     log_info "Writing TeamCity Compose file"
     echo -n "$${compose_config}" > "$${teamcity_directory}/docker-compose.yml"
 }
@@ -75,6 +94,7 @@ function start_teamcity() {
 
 function main() {
     if [ ! -f "$${MARKER_PATH}" ]; then
+        generate_cert "$${ADMIN_EMAIL}" "$${TEAMCITY_DOMAIN_NAME}"
         mount_data "/dev/disk/by-id/google-${data_device_name}" "$${TEAMCITY_DATA_MOUNT}"
         configure_teamcity "$${TEAMCITY_DIRECTORY}" "$${TEAMCITY_DATA_MOUNT}"
 

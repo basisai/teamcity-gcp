@@ -84,6 +84,11 @@ variable "allow_stopping_for_update" {
   default     = "true"
 }
 
+variable "admin_email" {
+  description = "BasisAI admin email address"
+  default     = "infraadmin@basis-ai.com"
+}
+
 variable "teamcity_image" {
   description = "TeamCity image to run"
   default     = "jetbrains/teamcity-server"
@@ -91,12 +96,17 @@ variable "teamcity_image" {
 
 variable "teamcity_tag" {
   description = "TeamCity image tag to run"
-  default     = "2018.2.2"
+  default     = "2021.1.1"
 }
 
 variable "teamcity_port" {
   description = "Port to expose TeamCity"
   default     = 80
+}
+
+variable "teamcity_base_url" {
+  description = "TeamCity domain name"
+  type        = string
 }
 
 variable "data_disk_name" {

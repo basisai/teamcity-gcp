@@ -7,6 +7,19 @@ services:
     environment:
       POSTGRES_PASSWORD: p@ssw0rd
     restart: always
+  nginx:
+    image: nginx:stable
+    restart: always
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt
+      - ${volume_base_path}/nginx:/etc/nginx/conf.d
+    logging:
+      options:
+        max-size: "1Gb"
+        max-file: "3"
   teamcity:
     image: ${teamcity_image}:${teamcity_tag}
     volumes:
@@ -16,8 +29,7 @@ services:
       TEAMCITY_SERVER_MEM_OPTS: "${teamcity_memory_options}"
     depends_on:
       - postgres
-    ports:
-      - "${teamcity_port}:8111"
+      - nginx
     restart: always
     logging:
       options:

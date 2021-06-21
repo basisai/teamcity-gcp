@@ -96,8 +96,3 @@
       snap:
         name: certbot-dns-google
         state: present
-    - name: Generate SSL certificate
-      shell:
-        cmd: certbot certonly --quiet --agree-tos --keep-until-expiring --rsa-key-size 4096 -m {{ admin_email }} --dns-google -d {{ domain_name }}
-      args:
-        executable: /bin/bash

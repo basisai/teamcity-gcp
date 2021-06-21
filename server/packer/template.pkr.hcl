@@ -2,11 +2,6 @@ packer {
   required_version = ">= 1.7.2"
 }
 
-variable "admin_email" {
-  type    = string
-  default = "infraadmin@basis-ai.com"
-}
-
 variable "docker_compose_version" {
   type    = string
   default = "1.29.2"
@@ -15,11 +10,6 @@ variable "docker_compose_version" {
 variable "docker_version" {
   type    = string
   default = "5:20.10.7~3-0~ubuntu-focal"
-}
-
-variable "domain_name" {
-  type    = string
-  default = "teamcity.amoy.ai"
 }
 
 variable "image_base_name" {
@@ -38,7 +28,7 @@ variable "network_project_id" {
 
 variable "omit_external_ip" {
   type    = string
-  default = "false"
+  default = "true"
 }
 
 variable "project_id" {
@@ -51,28 +41,32 @@ variable "subnetwork" {
 
 variable "use_internal_ip" {
   type    = string
-  default = "false"
+  default = "true"
 }
 
 variable "zone" {
   type = string
 }
 
+locals {
+  packer_build_time = lower(formatdate("YYYY-MM-DD'T'hh-mm-ssZ", timestamp()))
+}
+
 source "googlecompute" "ubuntu-teamcity-server" {
   disable_default_service_account = true
 
-  image_description = "TeamCity Server built at {{ timestamp }}"
+  image_description = "TeamCity Server built at ${local.packer_build_time}"
   image_family      = var.image_base_name
   image_labels = {
     packer    = "true"
     timestamp = "{{ timestamp }}"
   }
 
-  image_name = "${var.image_base_name}-{{ timestamp }}"
+  image_name = "${var.image_base_name}-${local.packer_build_time}"
 
   labels = {
     packer    = "true"
-    timestamp = "{{ timestamp }}"
+    timestamp = "${local.packer_build_time}"
   }
 
   machine_type = var.machine_type
@@ -100,7 +94,7 @@ build {
   }
 
   provisioner "ansible" {
-    extra_arguments = ["-e", "docker_version=${var.docker_version} docker_compose_version=${var.docker_compose_version} admin_email=${var.admin_email} domain_name=${var.domain_name}", "-e", "ansible_python_interpreter=/usr/bin/python3"]
+    extra_arguments = ["-e", "docker_version=${var.docker_version} docker_compose_version=${var.docker_compose_version}", "-e", "ansible_python_interpreter=/usr/bin/python3"]
     playbook_file   = "${path.root}/site.yml"
   }
 }

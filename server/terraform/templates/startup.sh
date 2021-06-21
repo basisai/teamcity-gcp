@@ -6,8 +6,6 @@ readonly SCRIPT_NAME="$(basename "$0")"
 readonly MARKER_PATH="/etc/startup-marker"
 readonly TEAMCITY_DATA_MOUNT="${data_mount_path}"
 readonly TEAMCITY_DIRECTORY="/opt/teamcity"
-readonly TEAMCITY_DOMAIN_NAME="${teamcity_base_url}"
-readonly ADMIN_EMAIL="${admin_email}"
 
 # Send the log output from this script to startup-script.log, syslog, and the console
 # Inspired by https://alestic.com/2010/12/ec2-user-data-output/
@@ -94,7 +92,7 @@ function start_teamcity() {
 
 function main() {
     if [ ! -f "$${MARKER_PATH}" ]; then
-        generate_cert "$${ADMIN_EMAIL}" "$${TEAMCITY_DOMAIN_NAME}"
+        generate_cert "${admin_email}" "${teamcity_base_url}"
         mount_data "/dev/disk/by-id/google-${data_device_name}" "$${TEAMCITY_DATA_MOUNT}"
         configure_teamcity "$${TEAMCITY_DIRECTORY}" "$${TEAMCITY_DATA_MOUNT}"
 

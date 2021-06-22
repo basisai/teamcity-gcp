@@ -32,10 +32,10 @@
   - name: Install Packages
     apt:
       name:
-        - python3-pip
-        - openjdk-8-jdk
-        - git
-        - unzip
+      - python3-pip
+      - openjdk-8-jdk
+      - git
+      - unzip
       state: latest
     become: yes
 
@@ -65,7 +65,7 @@
         create_home: yes
         group: "{{ teamcity_user }}"
         groups:
-          - docker
+        - docker
         name: "{{ teamcity_user }}"
         shell: /bin/bash
         state: present
@@ -93,7 +93,7 @@
         dest: "{{ install_directory }}"
         group: "{{ teamcity_user }}"
         owner: "{{ teamcity_user }}"
-        remote_src : yes
+        remote_src: yes
         src: "~{{ teamcity_user }}/agent.zip"
       become: yes
     - name: Set agent files owner

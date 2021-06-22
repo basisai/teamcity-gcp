@@ -85,6 +85,7 @@ data "google_compute_image" "teamcity_server" {
 
 # This IAM permission allows Letsencrypt generate cert using DNS verification
 resource "google_project_iam_custom_role" "dns_editor_role" {
+  count       = var.custom_dns_editor_role_enabled ? 1 : 0
   role_id     = "dns.editor"
   title       = "DNS Editor"
   project     = var.project_id
@@ -110,13 +111,18 @@ resource "google_service_account" "teamcity_server" {
 }
 
 resource "google_project_iam_member" "teamcity_server" {
-  for_each = setunion(
-    var.service_account_roles,
-    toset([google_project_iam_custom_role.dns_editor_role.id])
-  )
+  for_each = var.service_account_roles
 
   project = var.project_id
   role    = each.key
+  member  = "serviceAccount:${google_service_account.teamcity_server.email}"
+}
+
+resource "google_project_iam_member" "teamcity_server_dns_editor" {
+  count = var.custom_dns_editor_role_enabled ? 1 : 0
+
+  project = var.project_id
+  role    = google_project_iam_custom_role.dns_editor_role.id
   member  = "serviceAccount:${google_service_account.teamcity_server.email}"
 }
 

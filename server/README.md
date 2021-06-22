@@ -4,6 +4,10 @@ This module provisions a TeamCity server instance and a Postgres server on the s
 is persisted in a separate GCE disk that is protected against deletion via Terraform's lifecycle
 rule.
 
+## Prepare custom IAM role
+
+This module support generate Let's Encrypt SSL certificate using Cloud DNS validation. It requires the service account of TeamCity server instance has permission to update DNS. You can create custom IAM role by following [this document](https://certbot-dns-google.readthedocs.io/en/stable/#credentials), or just simply set `custom_dns_editor_role_enabled = true` in your Terraform variable.
+
 ## Packer Template
 
 You need to build a GCE image for this module to use. We provide a [Packer](http://www.packer.io/) with template in [`packer/`](packer/).
@@ -11,35 +15,7 @@ You need to build a GCE image for this module to use. We provide a [Packer](http
 Build the image with `packer build` and provide the necessary variables. Example command:
 
 ```
-packer build -var project_id=basis-terraform-admin -var zone=asia-southeast1-b -var network_project_id=admin-vpc -var subnetwork=core template.pkr.hcl
-```
-
-## Preparing IAM custom role
-
-When the IAM custom role first created or not existed, the following error will occur:
-
-```
-│ Error: Invalid for_each argument
-│
-│   on .terraform/modules/teamcity_server/server/terraform/main.tf line 113, in resource "google_project_iam_member" "teamcity_server":
-│  113:   for_each = setunion(
-│  114:     var.service_account_roles,
-│  115:     toset([google_project_iam_custom_role.dns_editor_role.id])
-│  116:   )
-│     ├────────────────
-│     │ google_project_iam_custom_role.dns_editor_role.id is a string, known only after apply
-│     │ var.service_account_roles is set of string with 2 elements
-│
-│ The "for_each" value depends on resource attributes that cannot be
-│ determined until apply, so Terraform cannot predict how many instances will
-│ be created. To work around this, use the -target argument to first apply
-│ only the resources that the for_each depends on.
-```
-
-The workaround is creating the custom role first with target:
-
-```
-terraform apply --target module.teamcity_server.google_project_iam_custom_role.dns_editor_role
+packer build -var project_id=<project-id> -var zone=<zone> -var network_project_id=<network-project-id> -var subnetwork=<subnet-name> template.pkr.hcl
 ```
 
 ## Preparing the Data Disk

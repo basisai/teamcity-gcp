@@ -152,3 +152,9 @@ variable "service_account_roles" {
     "roles/monitoring.metricWriter",
   ]
 }
+
+variable "custom_dns_editor_role_enabled" {
+  description = "Allow TeamCity server update CloudDNS to generate or renew Letsencrypt ceritificate"
+  type        = bool
+  default     = false
+}

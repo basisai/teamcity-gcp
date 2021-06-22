@@ -122,7 +122,7 @@ resource "google_project_iam_member" "teamcity_server_dns_editor" {
   count = var.custom_dns_editor_role_enabled ? 1 : 0
 
   project = var.project_id
-  role    = google_project_iam_custom_role.dns_editor_role.id
+  role    = google_project_iam_custom_role.dns_editor_role[0].id
   member  = "serviceAccount:${google_service_account.teamcity_server.email}"
 }
 

@@ -86,6 +86,11 @@ Included Terraform Module will help you provision TeamCity easily.
 | snapshot\_days\_in\_cycle | Days between snapshots | number | 1 | no |
 | snapshot\_start\_time | Time of snapshot | string | `"20:00"` | no |
 | max\_retention\_days | Maximum age of the snapshot that is allowed to be kept | number | 5 | no |
+| custom\_dns\_editor\_role\_enabled | Allow TeamCity server update CloudDNS to generate or renew Letsencrypt ceritificate | bool | `false` | no |
+| custom\_dns\_editor\_role\_id | DNS Editor role ID | string | `"dns.editor"` | no |
+| custom\_dns\_editor\_role\_title | DNS Editor role tittle | string | `"DNS Editor"` | no |
+| custom\_dns\_editor\_role\_description | DNS Editor role description | string | `"DNS Editor role description"` | no |
+| custom\_dns\_editor\_role\_id | DNS Editor role permission | list(string) | `["dns.changes.create", "dns.changes.get", "dns.changes.list", "dns.managedZones.list", "dns.resourceRecordSets.create", "dns.resourceRecordSets.delete", "dns.resourceRecordSets.get", "dns.resourceRecordSets.list", "dns.resourceRecordSets.update"]` | no |
 
 ## Outputs
 

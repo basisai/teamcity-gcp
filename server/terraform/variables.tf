@@ -158,3 +158,37 @@ variable "custom_dns_editor_role_enabled" {
   type        = bool
   default     = false
 }
+
+variable "custom_dns_editor_role_id" {
+  description = "DNS Editor role ID"
+  type        = string
+  default     = "dns.editor"
+}
+
+variable "custom_dns_editor_role_title" {
+  description = "DNS Editor role title"
+  type        = stirng
+  default     = "DNS Editor"
+}
+
+variable "custom_dns_editor_role_description" {
+  description = "DNS Editor role description"
+  type        = string
+  default     = "Custom IAM Role to manage Cloud DNS"
+}
+
+variable "custom_dns_editor_role_permission" {
+  description = "DNS Editor role permission"
+  type        = list(string)
+  default = [
+    "dns.changes.create",
+    "dns.changes.get",
+    "dns.changes.list",
+    "dns.managedZones.list",
+    "dns.resourceRecordSets.create",
+    "dns.resourceRecordSets.delete",
+    "dns.resourceRecordSets.get",
+    "dns.resourceRecordSets.list",
+    "dns.resourceRecordSets.update"
+  ]
+}

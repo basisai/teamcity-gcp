@@ -59,7 +59,7 @@ function mount_data() {
 
     local readonly uuid="$(blkid -s UUID -o value "$${device_name}")"
 
-    if [ -z "$$(grep $${uuid} /etc/fstab)" ]
+    if [ -z "$(grep $${uuid} /etc/fstab)" ]
     then
         echo "UUID=$${uuid} $${mount_path} ext4 discard,defaults,nofail 0 2" >> /etc/fstab
     fi
@@ -74,7 +74,7 @@ function mount_data() {
     mkdir -p $${mount_path}/letsencrypt/{live,renewal,archive}
     for dir in live renewal archive
         do
-            mount -o bind $${mount_path}/letsencrypt/$$dir /etc/letsencrypt/$$dir
+            mount -o bind $${mount_path}/letsencrypt/$dir /etc/letsencrypt/$dir
         done
 }
 

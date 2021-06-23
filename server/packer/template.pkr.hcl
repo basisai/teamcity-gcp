@@ -1,5 +1,11 @@
 packer {
   required_version = ">= 1.7.2"
+  required_plugins {
+    googlecompute = {
+      version = ">= 0.0.1"
+      source  = "github.com/hashicorp/googlecompute"
+    }
+  }
 }
 
 variable "docker_compose_version" {
@@ -48,6 +54,12 @@ variable "zone" {
   type = string
 }
 
+variable "ansible_python_interpreter" {
+  description = "Python interpreter path which was used to install Ansible"
+  type        = string
+  default     = "/usr/bin/python3"
+}
+
 locals {
   packer_build_time = lower(formatdate("YYYY-MM-DD'T'hh-mm-ssZ", timestamp()))
 }
@@ -94,7 +106,16 @@ build {
   }
 
   provisioner "ansible" {
-    extra_arguments = ["-e", "docker_version=${var.docker_version} docker_compose_version=${var.docker_compose_version}", "-e", "ansible_python_interpreter=/usr/bin/python3"]
-    playbook_file   = "${path.root}/site.yml"
+    ansible_env_vars = [
+      "ANSIBLE_PIPELINING=yes",
+      "ANSIBLE_REMOTE_TMP=/tmp/.ansible"
+    ]
+
+    extra_arguments = [
+      "-e", "docker_version=${var.docker_version} docker_compose_version=${var.docker_compose_version}",
+      "-e", "ansible_python_interpreter=${var.ansible_python_interpreter}"
+    ]
+
+    playbook_file = "${path.root}/site.yml"
   }
 }

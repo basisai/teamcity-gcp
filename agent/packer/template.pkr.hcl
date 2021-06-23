@@ -1,10 +1,17 @@
 packer {
   required_version = ">= 1.7.2"
+  required_plugins {
+    googlecompute = {
+      version = ">= 0.0.1"
+      source  = "github.com/hashicorp/googlecompute"
+    }
+  }
 }
 
 variable "additional_configuration" {
-  type    = string
-  default = ""
+  description = "Additional configuration in buildAgent.properties for TeamCity"
+  type        = string
+  default     = ""
 }
 
 variable "disk_size" {
@@ -77,6 +84,12 @@ variable "zone" {
   type = string
 }
 
+variable "ansible_python_interpreter" {
+  description = "Python interpreter path which was used to install Ansible"
+  type        = string
+  default     = "/usr/bin/python3"
+}
+
 locals {
   packer_build_time = lower(formatdate("YYYY-MM-DD'T'hh-mm-ssZ", timestamp()))
 }
@@ -123,8 +136,20 @@ build {
   }
 
   provisioner "ansible" {
-    ansible_env_vars = ["ANSIBLE_PIPELINING=yes", "ANSIBLE_REMOTE_TMP=/tmp/.ansible"]
-    extra_arguments  = ["-e", "teamcity_base_url=${var.teamcity_base_url} teamcity_user=${var.teamcity_user}", "-e", "additional_configuration=${var.additional_configuration}", "-e", "docker_version=${var.docker_version} docker_compose_version=${var.docker_compose_version}", "-e", "install_stackdriver_agent=${var.install_stackdriver_agent} install_telegraf=${var.install_telegraf}", "-e", "ansible_python_interpreter=/usr/bin/python3"]
-    playbook_file    = "${path.root}/site.yml"
+    ansible_env_vars = [
+      "ANSIBLE_PIPELINING=yes",
+      "ANSIBLE_REMOTE_TMP=/tmp/.ansible"
+    ]
+
+    extra_arguments = [
+      "-e", "teamcity_base_url=${var.teamcity_base_url} teamcity_user=${var.teamcity_user}",
+      "-e", "additional_configuration=${var.additional_configuration}",
+      "-e", "docker_version=${var.docker_version} docker_compose_version=${var.docker_compose_version}",
+      "-e", "install_stackdriver_agent=${var.install_stackdriver_agent}",
+      "-e", "install_telegraf=${var.install_telegraf}",
+      "-e", "ansible_python_interpreter=${var.ansible_python_interpreter}"
+    ]
+
+    playbook_file = "${path.root}/site.yml"
   }
 }

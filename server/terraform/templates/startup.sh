@@ -58,12 +58,24 @@ function mount_data() {
     mount -o discard,defaults "$${device_name}" "$${mount_path}"
 
     local readonly uuid="$(blkid -s UUID -o value "$${device_name}")"
-    echo "" >> /etc/fstab
-    echo "UUID=$${uuid} $${mount_path} ext4 discard,defaults,nofail 0 2" >> /etc/fstab
+
+    if [ -z "$$(grep $${uuid} /etc/fstab)" ]
+    then
+        echo "UUID=$${uuid} $${mount_path} ext4 discard,defaults,nofail 0 2" >> /etc/fstab
+    fi
+
     # Safety Check
     mount -a
+
     log_info "Make sure data volume ownership is 1000:1000"
     chown -R 1000:1000 $${mount_path}/{teamcity,nginx,logs}
+
+    log_info "Creating LetsEncrypt certificate directory"
+    mkdir -p $${mount_path}/letsencrypt/{live,renewal,archive}
+    for dir in live renewal archive
+        do
+            mount -o bind $${mount_path}/letsencrypt/$$dir /etc/letsencrypt/$$dir
+        done
 }
 
 function configure_teamcity() {
@@ -94,8 +106,10 @@ function start_teamcity() {
 
 function main() {
     if [ ! -f "$${MARKER_PATH}" ]; then
-        generate_cert "${admin_email}" "${teamcity_base_url}"
         mount_data "/dev/disk/by-id/google-${data_device_name}" "$${TEAMCITY_DATA_MOUNT}"
+
+        generate_cert "${admin_email}" "${teamcity_base_url}"
+
         configure_teamcity "$${TEAMCITY_DIRECTORY}" "$${TEAMCITY_DATA_MOUNT}"
 
         start_teamcity "$${TEAMCITY_DIRECTORY}"

@@ -167,7 +167,7 @@ variable "custom_dns_editor_role_id" {
 
 variable "custom_dns_editor_role_title" {
   description = "DNS Editor role title"
-  type        = stirng
+  type        = string
   default     = "DNS Editor"
 }
 

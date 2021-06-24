@@ -33,6 +33,17 @@ function log_error {
   log "ERROR" "$${message}"
 }
 
+function generate_cert () {
+    local readonly admin_email="$${1}"
+    local readonly domain_name="$${2}"
+    log_info "Generating LetsEncrypt certificate"
+    certbot certonly --quiet --agree-tos --keep-until-expiring \
+        --rsa-key-size 4096 \
+        -m "$${admin_email}" \
+        --dns-google -d "$${domain_name}" \
+        --dns-google-propagation-seconds 90
+}
+
 function mount_data() {
     local readonly device_name="$${1}"
     local readonly mount_path="$${2}"
@@ -47,22 +58,42 @@ function mount_data() {
     mount -o discard,defaults "$${device_name}" "$${mount_path}"
 
     local readonly uuid="$(blkid -s UUID -o value "$${device_name}")"
-    echo "" >> /etc/fstab
-    echo "UUID=$${uuid} $${mount_path} ext4 discard,defaults,nofail 0 2" >> /etc/fstab
+
+    if [ -z "$(grep $${uuid} /etc/fstab)" ]
+    then
+        echo "UUID=$${uuid} $${mount_path} ext4 discard,defaults,nofail 0 2" >> /etc/fstab
+    fi
+
     # Safety Check
     mount -a
+
+    log_info "Make sure data volume ownership is 1000:1000"
+    chown -R 1000:1000 $${mount_path}/{teamcity,nginx,logs}
+
+    log_info "Creating LetsEncrypt certificate directory"
+    mkdir -p $${mount_path}/letsencrypt/{live,renewal,archive}
+    for dir in live renewal archive
+        do
+            mount -o bind $${mount_path}/letsencrypt/$dir /etc/letsencrypt/$dir
+        done
 }
 
 function configure_teamcity() {
     local readonly teamcity_directory="$${1}"
     local readonly teamcity_data_mount="$${2}"
 
-    mkdir -p "$${teamcity_directory}"
+    mkdir -p "$${teamcity_directory}/nginx"
 
     local compose_config=$(cat <<EOF
 ${compose_config}
 EOF
 )
+    local nginx_config=$(cat <<EOF
+${nginx_config}
+EOF
+)
+    log_info "Writing TeamCity nginx config file"
+    echo -n "$${nginx_config}" > "$${teamcity_directory}/nginx/teamcity.conf"
     log_info "Writing TeamCity Compose file"
     echo -n "$${compose_config}" > "$${teamcity_directory}/docker-compose.yml"
 }
@@ -76,6 +107,9 @@ function start_teamcity() {
 function main() {
     if [ ! -f "$${MARKER_PATH}" ]; then
         mount_data "/dev/disk/by-id/google-${data_device_name}" "$${TEAMCITY_DATA_MOUNT}"
+
+        generate_cert "${admin_email}" "${teamcity_base_url}"
+
         configure_teamcity "$${TEAMCITY_DIRECTORY}" "$${TEAMCITY_DATA_MOUNT}"
 
         start_teamcity "$${TEAMCITY_DIRECTORY}"

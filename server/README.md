@@ -4,12 +4,19 @@ This module provisions a TeamCity server instance and a Postgres server on the s
 is persisted in a separate GCE disk that is protected against deletion via Terraform's lifecycle
 rule.
 
+## Prepare custom IAM role
+
+This module support generate Let's Encrypt SSL certificate using Cloud DNS validation. It requires the service account of TeamCity server instance has permission to update DNS. You can create custom IAM role by following [this document](https://certbot-dns-google.readthedocs.io/en/stable/#credentials), or just simply set `custom_dns_editor_role_enabled = true` in your Terraform variable.
+
 ## Packer Template
 
-You need to build a GCE image for this module to use. We provide a [Packer](http://www.packer.io/)
-template in [`packer/`](packer/).
+You need to build a GCE image for this module to use. We provide a [Packer](http://www.packer.io/) with template in [`packer/`](packer/).
 
-Build the image with `packer build` and provide the necessary variables.
+Build the image with `packer build` and provide the necessary variables. Example command:
+
+```
+packer build -var project_id=<project-id> -var zone=<zone> -var network_project_id=<network-project-id> -var subnetwork=<subnet-name> template.pkr.hcl
+```
 
 ## Preparing the Data Disk
 
@@ -79,6 +86,11 @@ Included Terraform Module will help you provision TeamCity easily.
 | snapshot\_days\_in\_cycle | Days between snapshots | number | 1 | no |
 | snapshot\_start\_time | Time of snapshot | string | `"20:00"` | no |
 | max\_retention\_days | Maximum age of the snapshot that is allowed to be kept | number | 5 | no |
+| custom\_dns\_editor\_role\_enabled | Allow TeamCity server update CloudDNS to generate or renew Letsencrypt ceritificate | bool | `false` | no |
+| custom\_dns\_editor\_role\_id | DNS Editor role ID | string | `"dns.editor"` | no |
+| custom\_dns\_editor\_role\_title | DNS Editor role tittle | string | `"DNS Editor"` | no |
+| custom\_dns\_editor\_role\_description | DNS Editor role description | string | `"DNS Editor role description"` | no |
+| custom\_dns\_editor\_role\_id | DNS Editor role permission | list(string) | `["dns.changes.create", "dns.changes.get", "dns.changes.list", "dns.managedZones.list", "dns.resourceRecordSets.create", "dns.resourceRecordSets.delete", "dns.resourceRecordSets.get", "dns.resourceRecordSets.list", "dns.resourceRecordSets.update"]` | no |
 
 ## Outputs
 

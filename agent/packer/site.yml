@@ -3,14 +3,13 @@
   hosts: all
   vars:
     # TeamCity Base URL
+    docker_version: "5:20.10.7~3-0~ubuntu-focal"
+    docker_compose_version: "1.29.2"
     teamcity_base_url: ""
-    docker_version: "5:19.03.13~3-0~ubuntu-focal"
-    docker_compose_version: "1.23.2"
     teamcity_user: "teamcity"
     install_directory: "/opt/teamcity"
     additional_configuration: ""
     install_stackdriver_agent: false
-
     install_telegraf: false
     telegraf_install_version: "stable"
     telegraf_directory: "/opt/telegraf"
@@ -23,26 +22,30 @@
       mode: 0777
       state: directory
     become: yes
+
   - name: Upgrade all packages to the latest version
     apt:
       upgrade: yes
       update_cache: yes
     become: yes
+
   - name: Install Packages
     apt:
       name:
-        - python3-pip
-        - openjdk-8-jdk
-        - git
-        - unzip
+      - python3-pip
+      - openjdk-8-jdk
+      - git
+      - unzip
       state: latest
     become: yes
+
   - name: Install Docker and Docker Compose
     include_role:
       name: "{{ playbook_dir }}/../../vendor/ansible-docker-ubuntu"
     vars:
       docker_py_version: ""
       pip_executable: "pip3"
+
   - name: Manage User and Groups
     block:
     - name: Create "docker" group
@@ -62,11 +65,12 @@
         create_home: yes
         group: "{{ teamcity_user }}"
         groups:
-          - docker
+        - docker
         name: "{{ teamcity_user }}"
         shell: /bin/bash
         state: present
       become: yes
+
   - name: Install TeamCity Agent
     block:
     - name: Download TeamCity Agent build
@@ -89,7 +93,7 @@
         dest: "{{ install_directory }}"
         group: "{{ teamcity_user }}"
         owner: "{{ teamcity_user }}"
-        remote_src : yes
+        remote_src: yes
         src: "~{{ teamcity_user }}/agent.zip"
       become: yes
     - name: Set agent files owner
@@ -110,70 +114,71 @@
         path: "~{{ teamcity_user }}/agent.zip"
         state: absent
       become: yes
+
   - name: Configure TeamCity Agent
     block:
-      - name: Create configuration file
-        copy:
-          dest: "{{ install_directory }}/conf/buildAgent.properties"
-          remote_src: yes
-          src: "{{ install_directory }}/conf/buildAgent.dist.properties"
-          group: "{{ teamcity_user }}"
-          owner: "{{ teamcity_user }}"
-          mode: 0666
-        become: yes
-      - name: Fill in serverUrl
-        lineinfile:
-          line: "serverUrl={{ teamcity_base_url }}"
-          path: "{{ install_directory }}/conf/buildAgent.properties"
-          regexp: "serverUrl=http://localhost:8111/"
-        become: yes
-      - name: Add in additional configuration
-        blockinfile:
-          path: "{{ install_directory }}/conf/buildAgent.properties"
-          block: "{{ additional_configuration }}"
-          insertafter: EOF
-        become: yes
-      - name: Create systemd service
-        template:
-          dest: "/etc/systemd/system/teamcity_agent.service"
-          group: root
-          owner: root
-          src: "{{ playbook_dir }}/teamcity_agent.service"
-        become: yes
-      - name: Enable systemd service
-        systemd:
-          daemon_reload: yes
-          enabled: yes
-          name: teamcity_agent
-        become: yes
+    - name: Create configuration file
+      copy:
+        dest: "{{ install_directory }}/conf/buildAgent.properties"
+        remote_src: yes
+        src: "{{ install_directory }}/conf/buildAgent.dist.properties"
+        group: "{{ teamcity_user }}"
+        owner: "{{ teamcity_user }}"
+        mode: 0666
+      become: yes
+    - name: Fill in serverUrl
+      lineinfile:
+        line: "serverUrl={{ teamcity_base_url }}"
+        path: "{{ install_directory }}/conf/buildAgent.properties"
+        regexp: "serverUrl=http://localhost:8111/"
+      become: yes
+    - name: Add in additional configuration
+      blockinfile:
+        path: "{{ install_directory }}/conf/buildAgent.properties"
+        block: "{{ additional_configuration }}"
+        insertafter: EOF
+      become: yes
+    - name: Create systemd service
+      template:
+        dest: "/etc/systemd/system/teamcity_agent.service"
+        group: root
+        owner: root
+        src: "{{ playbook_dir }}/teamcity_agent.service"
+      become: yes
+    - name: Enable systemd service
+      systemd:
+        daemon_reload: yes
+        enabled: yes
+        name: teamcity_agent
+      become: yes
 
   - name: Install StackDriver monitoring agent
     block:
-      - name: Create Temporary Script
-        tempfile:
-          state: file
-          suffix: ".sh"
-        register: "install_script"
-        become: yes
-      - name: Download Script
-        get_url:
-          url: https://dl.google.com/cloudagents/install-monitoring-agent.sh
-          force: yes
-          dest: "{{ install_script.path }}"
-          mode: '0777'
-        become: yes
-      - name: Run Script
-        command: "bash {{ install_script.path }}"
-        become: yes
-        register: install_output
-      - name: Print output
-        debug:
-          msg: "{{ install_output }}"
-      - name: Delete script
-        file:
-          state: absent
-          path: "{{ install_script.path }}"
-        become: yes
+    - name: Create Temporary Script
+      tempfile:
+        state: file
+        suffix: ".sh"
+      register: "install_script"
+      become: yes
+    - name: Download Script
+      get_url:
+        url: https://dl.google.com/cloudagents/install-monitoring-agent.sh
+        force: yes
+        dest: "{{ install_script.path }}"
+        mode: '0777'
+      become: yes
+    - name: Run Script
+      command: "bash {{ install_script.path }}"
+      become: yes
+      register: install_output
+    - name: Print output
+      debug:
+        msg: "{{ install_output }}"
+    - name: Delete script
+      file:
+        state: absent
+        path: "{{ install_script.path }}"
+      become: yes
     when: install_stackdriver_agent|bool
 
   - name: Install Telegraf
@@ -199,7 +204,6 @@
       retries: 2
       delay: 5
       become: yes
-
     - name: Set templatized Telegraf configuration
       template:
         src: "{{ playbook_dir }}/telegraf.toml"
@@ -210,12 +214,10 @@
         group: telegraf
         mode: 0744
       become: yes
-
     - name: Start the Telegraf service
       service:
         name: telegraf
         state: started
         enabled: yes
       become: yes
-
     when: install_telegraf|bool

@@ -3,55 +3,58 @@
   hosts: all
   vars:
     # sudo apt-cache madison docker-ce
-    docker_version: "5:20.10.6~3-0~ubuntu-focal"
-    docker_compose_version: "1.29.1"
+    docker_version: "5:20.10.7~3-0~ubuntu-focal"
+    docker_compose_version: "1.29.2"
     install_os_config_agent: true
+    admin_email: "infraadmin@basis-ai.com"
+    domain_name: "teamcity.amoy.ai"
   tasks:
   - name: Upgrade all packages to the latest version
     apt:
       upgrade: yes
       update_cache: yes
     become: yes
+
   - name: Install Pip3
     apt:
       name: python3-pip
       state: latest
     become: yes
+
   - name: Install Docker and Docker Compose
     include_role:
       name: "{{ playbook_dir }}/../../vendor/ansible-docker-ubuntu"
     vars:
       docker_py_version: ""
       pip_executable: "pip3"
+
   - name: Install StackDriver monitoring agent
+    become: yes
     block:
-      - name: Create Temporary Script
-        tempfile:
-          state: file
-          suffix: ".sh"
-        register: "install_script"
-        become: yes
-      - name: Download Script
-        get_url:
-          url: https://dl.google.com/cloudagents/install-monitoring-agent.sh
-          force: yes
-          dest: "{{ install_script.path }}"
-          mode: '0777'
-        become: yes
-      - name: Run Script
-        command: "bash {{ install_script.path }}"
-        become: yes
-        register: install_output
-      - name: Print output
-        debug:
-          msg: "{{ install_output }}"
-      - name: Delete script
-        file:
-          state: absent
-          path: "{{ install_script.path }}"
-        become: yes
+    - name: Create Temporary Script
+      tempfile:
+        state: file
+        suffix: ".sh"
+      register: "install_script"
+    - name: Download Script
+      get_url:
+        url: https://dl.google.com/cloudagents/install-monitoring-agent.sh
+        force: yes
+        dest: "{{ install_script.path }}"
+        mode: '0777'
+    - name: Run Script
+      command: "bash {{ install_script.path }}"
+      register: install_output
+    - name: Print output
+      debug:
+        msg: "{{ install_output }}"
+    - name: Delete script
+      file:
+        state: absent
+        path: "{{ install_script.path }}"
 
   - name: Install OS Config Agent
+    become: yes
     when: install_os_config_agent
     # See https://cloud.google.com/compute/docs/manage-os#agent-install
     block:
@@ -59,12 +62,37 @@
       apt_repository:
         repo: "deb http://packages.cloud.google.com/apt google-compute-engine-bionic-stable main"
         state: present
-      become: yes
     - name: Add GPG Key
       apt_key:
         url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
-      become: yes
     - name: Install
       apt:
         name: google-osconfig-agent
+        state: present
+
+  - name: Install and setup LetsEncrypt Certbot
+    become: yes
+    block:
+    - name: Update snap to the latest version
+      snap:
+        name: core
+        state: present
+    - name: Install certbot using snap
+      snap:
+        name: certbot
+        classic: yes
+        state: present
+    - name: Create certbot symlink
+      file:
+        src: /snap/bin/certbot
+        path: /usr/bin/certbot
+        state: link
+    - name: Confirm plugin containment level
+      shell:
+        cmd: snap set certbot trust-plugin-with-root=ok
+      args:
+        executable: /bin/bash
+    - name: Install certbot DNS plugin
+      snap:
+        name: certbot-dns-google
         state: present

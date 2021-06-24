@@ -83,6 +83,16 @@ data "google_compute_image" "teamcity_server" {
   project = coalesce(var.boot_disk_image_project, var.project_id)
 }
 
+# This IAM permission allows Letsencrypt generate cert using DNS verification
+resource "google_project_iam_custom_role" "dns_editor_role" {
+  count       = var.custom_dns_editor_role_enabled ? 1 : 0
+  role_id     = var.custom_dns_editor_role_id
+  title       = var.custom_dns_editor_role_title
+  project     = var.project_id
+  description = var.custom_dns_editor_role_description
+  permissions = var.custom_dns_editor_role_permission
+}
+
 resource "google_service_account" "teamcity_server" {
   account_id   = var.name
   display_name = var.description
@@ -97,13 +107,24 @@ resource "google_project_iam_member" "teamcity_server" {
   member  = "serviceAccount:${google_service_account.teamcity_server.email}"
 }
 
+resource "google_project_iam_member" "teamcity_server_dns_editor" {
+  count = var.custom_dns_editor_role_enabled ? 1 : 0
+
+  project = var.project_id
+  role    = google_project_iam_custom_role.dns_editor_role[0].id
+  member  = "serviceAccount:${google_service_account.teamcity_server.email}"
+}
+
 data "template_file" "startup_script" {
   template = file("${path.module}/templates/startup.sh")
 
   vars = {
-    data_device_name = local.data_device_name
-    data_mount_path  = local.data_mount_path
-    compose_config   = data.template_file.compose_config.rendered
+    admin_email       = var.admin_email
+    teamcity_base_url = var.teamcity_base_url
+    data_device_name  = local.data_device_name
+    data_mount_path   = local.data_mount_path
+    compose_config    = data.template_file.compose_config.rendered
+    nginx_config      = data.template_file.nginx_config.rendered
   }
 }
 
@@ -116,5 +137,13 @@ data "template_file" "compose_config" {
     teamcity_image          = var.teamcity_image
     teamcity_tag            = var.teamcity_tag
     teamcity_memory_options = var.teamcity_memory_options
+  }
+}
+
+data "template_file" "nginx_config" {
+  template = file("${path.module}/templates/teamcity.conf")
+
+  vars = {
+    teamcity_base_url = var.teamcity_base_url
   }
 }

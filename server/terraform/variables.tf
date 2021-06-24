@@ -84,6 +84,11 @@ variable "allow_stopping_for_update" {
   default     = "true"
 }
 
+variable "admin_email" {
+  description = "BasisAI admin email address"
+  default     = "infraadmin@basis-ai.com"
+}
+
 variable "teamcity_image" {
   description = "TeamCity image to run"
   default     = "jetbrains/teamcity-server"
@@ -91,12 +96,17 @@ variable "teamcity_image" {
 
 variable "teamcity_tag" {
   description = "TeamCity image tag to run"
-  default     = "2018.2.2"
+  default     = "2021.1.1"
 }
 
 variable "teamcity_port" {
   description = "Port to expose TeamCity"
   default     = 80
+}
+
+variable "teamcity_base_url" {
+  description = "TeamCity domain name"
+  type        = string
 }
 
 variable "data_disk_name" {
@@ -140,5 +150,45 @@ variable "service_account_roles" {
   default = [
     "roles/logging.logWriter",
     "roles/monitoring.metricWriter",
+  ]
+}
+
+variable "custom_dns_editor_role_enabled" {
+  description = "Allow TeamCity server update CloudDNS to generate or renew Letsencrypt ceritificate"
+  type        = bool
+  default     = false
+}
+
+variable "custom_dns_editor_role_id" {
+  description = "DNS Editor role ID"
+  type        = string
+  default     = "dns.editor"
+}
+
+variable "custom_dns_editor_role_title" {
+  description = "DNS Editor role title"
+  type        = string
+  default     = "DNS Editor"
+}
+
+variable "custom_dns_editor_role_description" {
+  description = "DNS Editor role description"
+  type        = string
+  default     = "Custom IAM Role to manage Cloud DNS"
+}
+
+variable "custom_dns_editor_role_permission" {
+  description = "DNS Editor role permission"
+  type        = list(string)
+  default = [
+    "dns.changes.create",
+    "dns.changes.get",
+    "dns.changes.list",
+    "dns.managedZones.list",
+    "dns.resourceRecordSets.create",
+    "dns.resourceRecordSets.delete",
+    "dns.resourceRecordSets.get",
+    "dns.resourceRecordSets.list",
+    "dns.resourceRecordSets.update"
   ]
 }

@@ -74,6 +74,7 @@ function mount_data() {
     chown -R 1000:1000 $${mount_path}/{teamcity,nginx,logs}
 
     log_info "Creating LetsEncrypt certificate directory"
+    mkdir -p /etc/letsencrypt/{live,renewal,archive}
     mkdir -p $${mount_path}/letsencrypt/{live,renewal,archive}
     for dir in live renewal archive
         do

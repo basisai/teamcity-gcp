@@ -67,6 +67,9 @@ function mount_data() {
     # Safety Check
     mount -a
 
+    log_info "Creating nginx directory"
+    mkdir -p $${mount_path}/nginx
+
     log_info "Make sure data volume ownership is 1000:1000"
     chown -R 1000:1000 $${mount_path}/{teamcity,nginx,logs}
 

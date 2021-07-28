@@ -77,9 +77,16 @@ function mount_data() {
     mkdir -p /etc/letsencrypt/{live,renewal,archive}
     mkdir -p $${mount_path}/letsencrypt/{live,renewal,archive}
     for dir in live renewal archive
-        do
-            mount -o bind $${mount_path}/letsencrypt/$dir /etc/letsencrypt/$dir
-        done
+    do
+        if [ -z "$(grep $${mount_path}/letsencrypt/$dir /etc/fstab)" ]
+        then
+            echo "$${mount_path}/letsencrypt/$dir /etc/letsencrypt/$dir none rw,bind 0 0" >> /etc/fstab
+        fi
+        mount -o bind $${mount_path}/letsencrypt/$dir /etc/letsencrypt/$dir
+    done
+
+    # Safety Check
+    mount -a
 }
 
 function configure_teamcity() {

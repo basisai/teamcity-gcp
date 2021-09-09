@@ -96,7 +96,7 @@ variable "teamcity_image" {
 
 variable "teamcity_tag" {
   description = "TeamCity image tag to run"
-  default     = "2021.1.1"
+  default     = "2021.1.3"
 }
 
 variable "teamcity_port" {

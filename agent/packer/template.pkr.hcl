@@ -26,7 +26,7 @@ variable "docker_compose_version" {
 
 variable "docker_version" {
   type    = string
-  default = "5:20.10.7~3-0~ubuntu-focal"
+  default = "5:20.10.8~3-0~ubuntu-focal"
 }
 
 variable "image_base_name" {
